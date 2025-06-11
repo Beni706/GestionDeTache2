@@ -1,183 +1,257 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { LayoutDashboard, FolderOpen, LogOut, Menu, Plus } from "lucide-react"
-import type { Project } from "@/types"
-import { useToast } from "@/hooks/use-toast"
-import { ProjectDialog } from "./projects/project-dialog"
-import { signOut, useSession } from "next-auth/react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Home,
+  FolderOpen,
+  Plus,
+  LogOut,
+  User,
+  Settings,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+import { ProjectDialog } from "@/components/projects/project-dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface Project {
+  id_projet: number;
+  nom: string;
+  description?: string;
+  statut: string;
+  _count?: {
+    taches: number;
+  };
+}
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [projects, setProjects] = useState<Project[]>([])
-  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false)
-  const { toast } = useToast()
-  const { data: session, status } = useSession()
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showProjectDialog, setShowProjectDialog] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [expandedProjects, setExpandedProjects] = useState(true);
 
-  const fetchProjects = async () => {
-    try {
-      if (status === "loading") return
+  const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
 
-      const bearerToken = session?.user?.apiToken || session?.accessToken || localStorage.getItem("token")
-
-      if (!bearerToken) {
-        console.log("Aucun token disponible pour l'authentification")
-        return
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projet`, {
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        console.error("Erreur API projets:", response.status, response.statusText)
-        throw new Error(`Erreur lors de la récupération des projets: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setProjects(data)
-    } catch (error) {
-      console.error("Erreur fetch projets:", error)
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les projets",
-        variant: "destructive",
-      })
-    }
-  }
-
+  // Charger les projets et les informations utilisateur
   useEffect(() => {
-    if (status !== "loading") {
-      fetchProjects()
-    }
-  }, [status])
+    const loadData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-  const handleLogout = async () => {
-    if (session) {
-      await signOut({ redirect: false })
-    }
+        // Décoder le token pour obtenir l'email
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setUserEmail(payload.email || "Utilisateur");
 
-    localStorage.removeItem("token")
-    localStorage.removeItem("role")
-    localStorage.removeItem("userId")
+        // Charger les projets
+        const response = await fetch("/api/projet", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-    window.location.href = "/login"
-  }
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadData();
+  }, []);
+
+  // Gérer la déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    toast({
+      title: "Déconnexion",
+      description: "Vous avez été déconnecté avec succès",
+    });
+    router.push("/login");
+  };
+
+  // Rafraîchir les projets après création
   const handleProjectCreated = () => {
-    fetchProjects()
-    setIsProjectDialogOpen(false)
-  }
+    setShowProjectDialog(false);
+    // Optionnel : recharger les projets ici si besoin
+  };
+
+  const navigation = [
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: Home,
+      current: pathname === "/dashboard",
+    },
+  ];
 
   return (
-    <>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild className="md:hidden">
-          <Button variant="outline" size="icon" className="absolute left-4 top-4 z-40">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0">
-          <SidebarContent
-            pathname={pathname}
-            projects={projects}
-            onLogout={handleLogout}
-            onAddProject={() => setIsProjectDialogOpen(true)}
-          />
-        </SheetContent>
-      </Sheet>
+    <div className="flex h-full w-64 flex-col bg-background border-r">
+      {/* Header avec profil utilisateur */}
+      <div className="flex h-16 items-center justify-between px-4 border-b">
+        <div className="flex items-center space-x-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-sm">
+              {userEmail.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">
+              {userEmail}
+            </p>
+          </div>
+        </div>
 
-      <aside className="hidden md:flex w-64 flex-col border-r bg-background">
-        <SidebarContent
-          pathname={pathname}
-          projects={projects}
-          onLogout={handleLogout}
-          onAddProject={() => setIsProjectDialogOpen(true)}
-        />
-      </aside>
-
-      <ProjectDialog
-        open={isProjectDialogOpen}
-        onOpenChange={setIsProjectDialogOpen}
-        onProjectCreated={handleProjectCreated}
-      />
-    </>
-  )
-}
-
-interface SidebarContentProps {
-  pathname: string
-  projects: Project[]
-  onLogout: () => void
-  onAddProject: () => void
-}
-
-function SidebarContent({ pathname, projects, onLogout, onAddProject }: SidebarContentProps) {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <LayoutDashboard className="h-6 w-6" />
-          <span>Gestionnaire de Projets</span>
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/profile" className="flex items-center">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profil</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Déconnexion</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <ScrollArea className="flex-1 px-2">
-        <div className="space-y-2 py-4">
-          <div className="px-3 py-2">
-            <h2 className="mb-2 px-2 text-lg font-semibold">Navigation</h2>
-            <div className="space-y-1">
-              <Link href="/dashboard" passHref>
-                <Button variant={pathname === "/dashboard" ? "secondary" : "ghost"} className="w-full justify-start">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Mes Projets
-                </Button>
+      <ScrollArea className="flex-1">
+        <div className="space-y-2 p-4">
+          {/* Navigation principale */}
+          <nav className="space-y-1">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                  item.current
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                <item.icon className="mr-3 h-4 w-4" />
+                {item.name}
               </Link>
-            </div>
-          </div>
+            ))}
+          </nav>
 
-          <div className="px-3 py-2">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="px-2 text-lg font-semibold">Projets</h2>
-              <Button variant="ghost" size="icon" onClick={onAddProject} className="h-7 w-7">
-                <Plus className="h-4 w-4" />
-                <span className="sr-only">Ajouter un projet</span>
+          <Separator />
+
+          {/* Section Projets */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedProjects(!expandedProjects)}
+                className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-foreground p-0 h-auto"
+              >
+                {expandedProjects ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                <span>Projets</span>
+                <Badge variant="secondary" className="ml-2 h-5 text-xs">
+                  {projects.length}
+                </Badge>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowProjectDialog(true)}
+                className="h-6 w-6 p-0"
+              >
+                <Plus className="h-3 w-3" />
               </Button>
             </div>
-            <div className="space-y-1">
-              {projects.map((project) => (
-                <Link key={project.id_projet} href={`/project/${project.id_projet}`} passHref>
-                  <Button
-                    variant={pathname.includes(`/project/${project.id_projet}`) ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <FolderOpen className="mr-2 h-4 w-4" />
-                    {project.nom}
-                  </Button>
-                </Link>
-              ))}
-              {projects.length === 0 && <p className="text-sm text-muted-foreground px-2">Aucun projet</p>}
-            </div>
+
+            {expandedProjects && (
+              <div className="space-y-1 pl-2">
+                {loading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  </div>
+                ) : projects.length === 0 ? (
+                  <p className="text-xs text-muted-foreground py-2 px-3">
+                    Aucun projet
+                  </p>
+                ) : (
+                  projects.map((project) => (
+                    <Link
+                      key={project.id_projet}
+                      href={`/project/${project.id_projet}`}
+                      className={cn(
+                        "flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors group",
+                        pathname === `/project/${project.id_projet}`
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      <div className="flex items-center space-x-2 flex-1 min-w-0">
+                        <FolderOpen className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{project.nom}</span>
+                      </div>
+                      {project._count?.taches && project._count.taches > 0 && (
+                        <Badge variant="secondary" className="h-4 text-xs ml-2">
+                          {project._count.taches}
+                        </Badge>
+                      )}
+                    </Link>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
       </ScrollArea>
 
-      <div className="mt-auto border-t p-4">
-        <Button variant="ghost" className="w-full justify-start" onClick={onLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
-        </Button>
-      </div>
+      {/* Dialog de création de projet */}
+      <ProjectDialog
+        open={showProjectDialog}
+        onOpenChange={setShowProjectDialog}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
-  )
+  );
 }

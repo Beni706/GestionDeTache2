@@ -327,6 +327,25 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="current-password-email">Mot de passe actuel</Label>
+                <div className="relative">
+                  <Input
+                    id="current-password-email"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={emailForm.currentPassword}
+                    onChange={(e) => setEmailForm({ ...emailForm, currentPassword: e.target.value })}
+                    placeholder="Votre mot de passe actuel"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
                 {errors.currentPassword && <p className="text-sm text-destructive">{errors.currentPassword}</p>}
               </div>
 
@@ -361,6 +380,25 @@ export default function ProfilePage() {
           <form onSubmit={handleUpdatePassword} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
+                <Label htmlFor="current-password">Mot de passe actuel</Label>
+                <div className="relative">
+                  <Input
+                    id="current-password"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    placeholder="Mot de passe actuel"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
                 {errors.currentPassword && <p className="text-sm text-destructive">{errors.currentPassword}</p>}
               </div>
 

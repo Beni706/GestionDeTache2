@@ -5,8 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../app/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] // Pour éviter les problèmes de compatibilité avec les environnements de production
 }
 
 datasource db {
@@ -27,26 +28,35 @@ enum Priorite {
 }
 
 model Utilisateur {
-  id_utilisateur Int         @id @default(autoincrement())
-  email          String      @unique
+  id_utilisateur Int      @id @default(autoincrement())
+  email          String   @unique
   password       String
+  projet         Projet[]
+  taches         Tache[]
+}
+
+model Projet {
+  id_projet      Int         @id @default(autoincrement())
+  nom            String
+  id_utilisateur Int
+  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
   categories     Categorie[]
   taches         Tache[]
 }
 
 model Categorie {
-  id_categorie   Int         @id @default(autoincrement())
-  nom            String
-  id_utilisateur Int
-  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
-  tache          Tache[]
+  id_categorie Int     @id @default(autoincrement())
+  nom          String
+  id_projet    Int
+  projet       Projet  @relation(fields: [id_projet], references: [id_projet])
+  taches       Tache[]
 }
 
 model Tache {
   id_tache        Int           @id @default(autoincrement())
   titre           String
   description     String?
-  date_limite     DateTime
+  date_limite     DateTime? // Rendu optionnel car une date limite n'est pas toujours nécessaire
   priorite        Priorite
   status          Status        @default(TODO)
   id_categorie    Int?
@@ -54,6 +64,8 @@ model Tache {
   id_utilisateur  Int
   utilisateur     Utilisateur   @relation(fields: [id_utilisateur], references: [id_utilisateur])
   fichiers_joints FicherJoint[]
+  id_projet       Int
+  projet          Projet        @relation(fields: [id_projet], references: [id_projet])
 }
 
 model FicherJoint {

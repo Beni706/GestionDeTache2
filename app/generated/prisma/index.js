@@ -166,7 +166,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\User\\Documents\\Wordpress\\gestion-tache\\app\\generated\\prisma",
+      "value": "C:\\Users\\User\\Documents\\Wordpress\\GestionDeTache\\app\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -177,10 +177,14 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\User\\Documents\\Wordpress\\gestion-tache\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\User\\Documents\\Wordpress\\GestionDeTache\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -194,6 +198,7 @@ const config = {
     "db"
   ],
   "activeProvider": "sqlite",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -202,8 +207,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Status {\n  TODO // à faire\n  IN_PROGRESS // en cours\n  DONE // terminé\n}\n\nenum Priorite {\n  LOW // faible\n  MEDIUM // moyenne\n  HIGH // importante\n}\n\nmodel Utilisateur {\n  id_utilisateur Int      @id @default(autoincrement())\n  email          String   @unique\n  password       String\n  projet         Projet[]\n  taches         Tache[]\n}\n\nmodel Projet {\n  id_projet      Int         @id @default(autoincrement())\n  nom            String\n  id_utilisateur Int\n  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])\n  categories     Categorie[]\n  taches         Tache[]\n}\n\nmodel Categorie {\n  id_categorie Int     @id @default(autoincrement())\n  nom          String\n  id_projet    Int\n  projet       Projet  @relation(fields: [id_projet], references: [id_projet])\n  taches       Tache[]\n}\n\nmodel Tache {\n  id_tache        Int           @id @default(autoincrement())\n  titre           String\n  description     String?\n  date_limite     DateTime? // Rendu optionnel car une date limite n'est pas toujours nécessaire\n  priorite        Priorite\n  status          Status        @default(TODO)\n  id_categorie    Int?\n  categorie       Categorie?    @relation(fields: [id_categorie], references: [id_categorie])\n  id_utilisateur  Int\n  utilisateur     Utilisateur   @relation(fields: [id_utilisateur], references: [id_utilisateur])\n  fichiers_joints FicherJoint[]\n  id_projet       Int\n  projet          Projet        @relation(fields: [id_projet], references: [id_projet])\n}\n\nmodel FicherJoint {\n  id_ficher Int    @id @default(autoincrement())\n  url       String\n  nom       String\n  id_tache  Int\n  tache     Tache  @relation(fields: [id_tache], references: [id_tache])\n}\n",
-  "inlineSchemaHash": "2779b78f760b97bc870ba1ba57c527f76e0174c1635e0b95b56c93383be0f310",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../app/generated/prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"] // Pour éviter les problèmes de compatibilité avec les environnements de production\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Status {\n  TODO // à faire\n  IN_PROGRESS // en cours\n  DONE // terminé\n}\n\nenum Priorite {\n  LOW // faible\n  MEDIUM // moyenne\n  HIGH // importante\n}\n\nmodel Utilisateur {\n  id_utilisateur Int      @id @default(autoincrement())\n  email          String   @unique\n  password       String\n  projet         Projet[]\n  taches         Tache[]\n}\n\nmodel Projet {\n  id_projet      Int         @id @default(autoincrement())\n  nom            String\n  id_utilisateur Int\n  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])\n  categories     Categorie[]\n  taches         Tache[]\n}\n\nmodel Categorie {\n  id_categorie Int     @id @default(autoincrement())\n  nom          String\n  id_projet    Int\n  projet       Projet  @relation(fields: [id_projet], references: [id_projet])\n  taches       Tache[]\n}\n\nmodel Tache {\n  id_tache        Int           @id @default(autoincrement())\n  titre           String\n  description     String?\n  date_limite     DateTime? // Rendu optionnel car une date limite n'est pas toujours nécessaire\n  priorite        Priorite\n  status          Status        @default(TODO)\n  id_categorie    Int?\n  categorie       Categorie?    @relation(fields: [id_categorie], references: [id_categorie])\n  id_utilisateur  Int\n  utilisateur     Utilisateur   @relation(fields: [id_utilisateur], references: [id_utilisateur])\n  fichiers_joints FicherJoint[]\n  id_projet       Int\n  projet          Projet        @relation(fields: [id_projet], references: [id_projet])\n}\n\nmodel FicherJoint {\n  id_ficher Int    @id @default(autoincrement())\n  url       String\n  nom       String\n  id_tache  Int\n  tache     Tache  @relation(fields: [id_tache], references: [id_tache])\n}\n",
+  "inlineSchemaHash": "aaddc11da963a20bd1ab2c87356efe9396fcf6e75c76a767f61c834572890aba",
   "copyEngine": true
 }
 
@@ -244,6 +249,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "app/generated/prisma/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "app/generated/prisma/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "app/generated/prisma/schema.prisma")

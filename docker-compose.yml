@@ -1,0 +1,20 @@
+services:
+  app:
+    build: . # Indique à Docker Compose de construire l'image à partir du Dockerfile dans le répertoire courant
+    image: app-gestion-tache # Nom de l'image à utiliser/créer
+    ports:
+      - "3000:3000"
+    environment:
+      # Récupérez ces valeurs depuis votre fichier .env ou docker.env, ou définissez-les ici
+      # Assurez-vous que JWT_SECRET a une valeur réelle
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?err} # Le build échouera si NEXTAUTH_SECRET n'est pas défini
+      JWT_SECRET: ${JWT_SECRET:?err} # Le build échouera si JWT_SECRET n'est pas défini
+      DATABASE_URL: "file:/app/prisma/dev.db" # Chemin à l'intérieur du conteneur
+    volumes:
+      # Monte le dossier prisma local dans /app/prisma du conteneur
+      # Cela permet de persister le fichier dev.db et de voir les migrations
+      - ./prisma:/app/prisma
+    # Exécute les migrations Prisma avant de démarrer l'application Next.js
+    # Cela suppose que votre Dockerfile CMD est "pnpm start" ou similaire
+    command: sh -c "pnpm exec prisma migrate deploy && pnpm exec prisma db seed && pnpm start"

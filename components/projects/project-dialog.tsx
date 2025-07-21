@@ -53,7 +53,7 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
     try {
       const token = session?.user?.apiToken || session?.accessToken || localStorage.getItem("token")
 
-      const response = await fetch(`${API_URL}/projet${project ? `/${project.id_projet}` : ""}`, {
+      const response = await fetch(`/api/projet${project ? `/${project.id_projet}` : ""}`, {
         method: project ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",

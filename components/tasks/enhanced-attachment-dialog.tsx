@@ -87,7 +87,7 @@ export function EnhancedAttachmentDialog({
       }
 
       console.log(`Fetching attachments for task ID: ${task.id_tache}`)
-      const response = await fetch(`${API_URL}/ficherJoint?id_tache=${task.id_tache}`, {
+      const response = await fetch(`/api/ficherJoint?id_tache=${task.id_tache}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ export function EnhancedAttachmentDialog({
 
     try {
       console.log(`Uploading file: ${file.name}`)
-      const response = await fetch(`${API_URL}/upload`, {
+      const response = await fetch(`/api/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -162,7 +162,7 @@ export function EnhancedAttachmentDialog({
         return
       }
 
-      const response = await fetch(`${API_URL}/ficherJoint/${attachmentId}`, {
+      const response = await fetch(`/api/ficherJoint/${attachmentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -227,7 +227,7 @@ export function EnhancedAttachmentDialog({
           console.log(`File uploaded successfully: ${fileUrl}`)
 
           // Enregistrer en base de données
-          const response = await fetch(`${API_URL}/ficherJoint`, {
+          const response = await fetch(`/api/ficherJoint`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,

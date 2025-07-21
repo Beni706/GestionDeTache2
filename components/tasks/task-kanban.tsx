@@ -68,7 +68,7 @@ export function TaskKanban({ tasks, categories, onStatusChange, onTaskUpdated }:
 
     try {
       const token = session?.accessToken || localStorage.getItem("token")
-      const response = await fetch(`${API_URL}/tache/${taskToDelete.id_tache}`, {
+      const response = await fetch(`/api/tache/${taskToDelete.id_tache}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

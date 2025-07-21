@@ -90,7 +90,7 @@ export function AttachmentDialog({ open, onOpenChange, task, onAttachmentAdded }
       const uploadedUrl = fileUrl || `https://example.com/files/${fileName}`
 
       const token = session?.accessToken || localStorage.getItem("token")
-      const response = await fetch(`${API_URL}/ficherJoint`, {
+      const response = await fetch(`/api/ficherJoint`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -149,7 +149,7 @@ export function AttachmentDialog({ open, onOpenChange, task, onAttachmentAdded }
 
     try {
       const token = session?.accessToken || localStorage.getItem("token")
-      const response = await fetch(`${API_URL}/ficherJoint/${attachmentToDelete.id_ficher}`, {
+      const response = await fetch(`/api/ficherJoint/${attachmentToDelete.id_ficher}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -34,7 +34,7 @@ export default function DashboardPage() {
         return
       }
 
-      const response = await fetch(`${API_URL}/projet`, {
+      const response = await fetch(`/api/projet`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

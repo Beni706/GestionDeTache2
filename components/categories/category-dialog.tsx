@@ -78,7 +78,7 @@ export function CategoryDialog({
       console.log("Données envoyées:", categoryData)
 
       // URL et méthode selon création ou modification
-      const url = category ? `${API_URL}/categorie/${category.id_categorie}` : `${API_URL}/categorie`
+      const url = category ? `/api/categorie/${category.id_categorie}` : `/api/categorie`
       const method = category ? "PUT" : "POST"
 
       const response = await fetch(url, {

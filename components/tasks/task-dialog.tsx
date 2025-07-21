@@ -109,8 +109,8 @@ export function TaskDialog({
         }
 
         const url = projectId
-          ? `${API_URL}/categorie?projet=${projectId}`
-          : `${API_URL}/categorie`;
+          ? `/api/categorie?projet=${projectId}`
+          : `/api/categorie`;
 
         const response = await fetch(url, {
           headers: {
@@ -200,8 +200,8 @@ export function TaskDialog({
 
       // URL et méthode selon création ou modification
       const url = task
-        ? `${API_URL}/tache/${task.id_tache}`
-        : `${API_URL}/tache`;
+        ? `/api/tache/${task.id_tache}`
+        : `/api/tache`;
       const method = task ? "PUT" : "POST";
 
       // Appel API pour créer ou modifier la tâche

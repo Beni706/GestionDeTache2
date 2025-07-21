@@ -45,7 +45,7 @@ export default function RegisterPage() {
 
     try {
       // Appel à l'API pour créer un compte
-      const response = await fetch(`${API_URL}/utilisateur`, {
+      const response = await fetch(`/api/utilisateur`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

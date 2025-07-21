@@ -7,7 +7,7 @@ services:
     environment:
       # Récupérez ces valeurs depuis votre fichier .env ou docker.env, ou définissez-les ici
       # Assurez-vous que JWT_SECRET a une valeur réelle
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://getion-de-tache}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?err} # Le build échouera si NEXTAUTH_SECRET n'est pas défini
       JWT_SECRET: ${JWT_SECRET:?err} # Le build échouera si JWT_SECRET n'est pas défini
       DATABASE_URL: "file:/app/prisma/dev.db" # Chemin à l'intérieur du conteneur

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,11 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
 
   const { toast } = useToast()
   const { data: session } = useSession()
+
+  useEffect(() => {
+    // Mettre à jour le nom du projet dans le formulaire si le projet à éditer change
+    setNom(project?.nom || "")
+  }, [project])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

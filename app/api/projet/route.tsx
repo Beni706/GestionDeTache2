@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         const newprojet = await prisma.projet.create({
             data: {
                 nom,
-                id_utilisateur
+                id_utilisateur: Number(id_utilisateur),
             },
         });
         return NextResponse.json({message: "projet créé avec succès", newprojet}, {status: 201});

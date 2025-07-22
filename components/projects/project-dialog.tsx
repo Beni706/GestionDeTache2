@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -30,7 +29,6 @@ interface ProjectDialogProps {
 
 export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }: ProjectDialogProps) {
   const [nom, setNom] = useState(project?.nom || "")
-  const [description, setDescription] = useState(project?.description || "")
   const [isLoading, setIsLoading] = useState(false)
 
   const { toast } = useToast()
@@ -52,6 +50,13 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
 
     try {
       const token = session?.user?.apiToken || session?.accessToken || localStorage.getItem("token")
+      const userId = session?.user?.id || localStorage.getItem("userId")
+
+      if (!userId) {
+        toast({ title: "Erreur", description: "Utilisateur non identifié. Veuillez vous reconnecter.", variant: "destructive" })
+        setIsLoading(false)
+        return
+      }
 
       const response = await fetch(`/api/projet${project ? `/${project.id_projet}` : ""}`, {
         method: project ? "PUT" : "POST",
@@ -61,7 +66,7 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
         },
         body: JSON.stringify({
           nom: nom.trim(),
-          description: description.trim(),
+          id_utilisateur: userId,
         }),
       })
 
@@ -75,7 +80,6 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
       })
 
       setNom("")
-      setDescription("")
       onProjectCreated()
     } catch (error) {
       toast({
@@ -107,16 +111,6 @@ export function ProjectDialog({ open, onOpenChange, onProjectCreated, project }:
                 onChange={(e) => setNom(e.target.value)}
                 placeholder="Entrez le nom du projet"
                 required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description (optionnel)</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Décrivez votre projet..."
-                rows={3}
               />
             </div>
           </div>

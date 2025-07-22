@@ -44,6 +44,7 @@ model Projet {
   taches         Tache[]
 }
 
+// Le modèle Categorie est pour organiser les tâches dans un projet exemple : "Développement", "Design", etc.
 model Categorie {
   id_categorie Int     @id @default(autoincrement())
   nom          String

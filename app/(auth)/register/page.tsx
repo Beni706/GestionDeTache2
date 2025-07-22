@@ -23,7 +23,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [oauthLoading, setOauthLoading] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -83,33 +82,11 @@ export default function RegisterPage() {
   }
 
   // Fonction pour gérer l'inscription avec OAuth (GitHub ou Google)
-  const handleOAuthSignIn = async (provider: string) => {
-    try {
-      setOauthLoading(provider)
-      console.log(`Tentative d'inscription avec ${provider}...`)
-
-      // Utilisation de NextAuth pour l'inscription OAuth
-      const result = await signIn(provider, {
-        callbackUrl: "/dashboard",
-        redirect: false, // Ne pas rediriger automatiquement pour gérer les erreurs
-      })
-
-      if (result?.error) {
-        throw new Error(result.error)
-      }
-
-      if (result?.url) {
-        router.push(result.url)
-      }
-    } catch (error) {
-      console.error(`Erreur lors de l'inscription avec ${provider}:`, error)
-      toast({
-        title: "Erreur d'inscription",
-        description: `Erreur lors de l'inscription avec ${provider}. Vérifiez que le service est configuré.`,
-        variant: "destructive",
-      })
-      setOauthLoading(null)
-    }
+  const handleOAuthSignIn = (provider: string) => {
+    toast({
+      title: "Bientôt disponible",
+      description: "Cette fonctionnalité est encore en développement.",
+    })
   }
 
   return (
@@ -172,10 +149,9 @@ export default function RegisterPage() {
                 type="button"
                 className="w-full"
                 onClick={() => handleOAuthSignIn("github")}
-                disabled={oauthLoading !== null}
               >
                 <Github className="mr-2 h-4 w-4" />
-                {oauthLoading === "github" ? "Inscription..." : "GitHub"}
+                GitHub
               </Button>
 
               {/* Bouton d'inscription avec Google */}
@@ -184,10 +160,9 @@ export default function RegisterPage() {
                 type="button"
                 className="w-full"
                 onClick={() => handleOAuthSignIn("google")}
-                disabled={oauthLoading !== null}
               >
                 <Mail className="mr-2 h-4 w-4" />
-                {oauthLoading === "google" ? "Inscription..." : "Google"}
+                Google
               </Button>
             </div>
           </CardContent>

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 
 const prisma = new PrismaClient()
 
-// Récupérer une catégorie par ID
+// Récupérer un projet par ID
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const isAuthenticated = await verifyJWT(request)
   if (!isAuthenticated) {
@@ -35,15 +35,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const id = Number.parseInt(params.id)
     const { nom, id_utilisateur } = await request.json()
 
-    // vérifier si la projet existe
+    // vérifier si le projet existe
     const existeprojet = await prisma.projet.findUnique({
       where: { id_projet: id },
     })
     if (!existeprojet) {
-      return NextResponse.json({ message: "Catégorie non trouvée" }, { status: 404 })
+      return NextResponse.json({ message: "Projet non trouvé" }, { status: 404 })
     }
 
-    // Modifier la projet
+    // Modifier le projet
     const projet = await prisma.projet.update({
       where: { id_projet: id },
       data: {
@@ -51,7 +51,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         id_utilisateur: Number.parseInt(id_utilisateur),
       },
     })
-    return NextResponse.json({ message: "Catégorie modifiée avec succès", projet }, { status: 200 })
+    return NextResponse.json({ message: "Projet modifié avec succès", projet }, { status: 200 })
   } catch (error) {
     console.log("Erreur serveur : ", error)
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })
@@ -73,13 +73,13 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       where: { id_projet: id },
     })
     if (!existeprojet) {
-      return NextResponse.json({ message: "Catégorie non trouvée" }, { status: 404 })
+      return NextResponse.json({ message: "Projet non trouvé" }, { status: 404 })
     }
 
     await prisma.projet.delete({
       where: { id_projet: id },
     })
-    return NextResponse.json({ message: "Catégorie supprimée avec succès" }, { status: 200 })
+    return NextResponse.json({ message: "Projet supprimé avec succès" }, { status: 200 })
   } catch (error) {
     console.log("Erreur serveur :", error)
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })

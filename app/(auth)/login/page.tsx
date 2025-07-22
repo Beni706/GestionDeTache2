@@ -29,7 +29,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -82,33 +81,11 @@ export default function LoginPage() {
   };
 
   // Fonction pour gérer la connexion avec OAuth (GitHub ou Google)
-  const handleOAuthSignIn = async (provider: string) => {
-    try {
-      setOauthLoading(provider);
-      console.log(`Tentative de connexion avec ${provider}...`);
-
-      // Utilisation de NextAuth pour la connexion OAuth
-      const result = await signIn(provider, {
-        callbackUrl: "/dashboard",
-        redirect: false, // Ne pas rediriger automatiquement pour gérer les erreurs
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      if (result?.url) {
-        router.push(result.url);
-      }
-    } catch (error) {
-      console.error(`Erreur lors de la connexion avec ${provider}:`, error);
-      toast({
-        title: "Erreur de connexion",
-        description: `Erreur lors de la connexion avec ${provider}. Vérifiez que le service est configuré.`,
-        variant: "destructive",
-      });
-      setOauthLoading(null);
-    }
+  const handleOAuthSignIn = (provider: string) => {
+    toast({
+      title: "Bientôt disponible",
+      description: "Cette fonctionnalité est encore en développement.",
+    });
   };
 
   return (
@@ -166,10 +143,9 @@ export default function LoginPage() {
               type="button"
               className="w-full"
               onClick={() => handleOAuthSignIn("github")}
-              disabled={oauthLoading !== null}
             >
               <Github className="mr-2 h-4 w-4" />
-              {oauthLoading === "github" ? "Connexion..." : "GitHub"}
+              GitHub
             </Button>
 
             {/* Bouton de connexion avec Google */}
@@ -178,10 +154,9 @@ export default function LoginPage() {
               type="button"
               className="w-full"
               onClick={() => handleOAuthSignIn("google")}
-              disabled={oauthLoading !== null}
             >
               <Mail className="mr-2 h-4 w-4" />
-              {oauthLoading === "google" ? "Connexion..." : "Google"}
+              Google
             </Button>
           </div>
         </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -50,43 +51,60 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const { data: session, status } = useSession();
 
   // Charger les projets et les informations utilisateur
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        // Décoder le token pour obtenir l'email
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUserEmail(payload.email || "Utilisateur");
-
-        // Charger les projets
-        const response = await fetch("/api/projet", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement:", error);
-      } finally {
-        setLoading(false);
+      if (status === "loading") {
+        setLoading(true);
+        return;
       }
+
+      const token = session?.user?.apiToken || localStorage.getItem("token");
+      const userId = session?.user?.id || localStorage.getItem("userId");
+      let email = session?.user?.email;
+
+      if (!email && token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          email = payload.email;
+        } catch (e) {
+          console.error("Failed to decode token:", e);
+        }
+      }
+      setUserEmail(email || "Utilisateur");
+
+      if (token && userId) {
+        try {
+          const response = await fetch(`/api/projet/utilisateur/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setProjects(data);
+          } else {
+            toast({ title: "Erreur", description: "Impossible de charger les projets.", variant: "destructive" });
+          }
+        } catch (error) {
+          console.error("Erreur lors du chargement des projets:", error);
+          toast({ title: "Erreur", description: "Une erreur réseau est survenue.", variant: "destructive" });
+        }
+      }
+      setLoading(false);
     };
 
     loadData();
-  }, []);
+  }, [session, status, toast]);
 
   // Gérer la déconnexion
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (status === "authenticated") {
+      await signOut({ redirect: false });
+    }
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
     toast({
       title: "Déconnexion",
       description: "Vous avez été déconnecté avec succès",

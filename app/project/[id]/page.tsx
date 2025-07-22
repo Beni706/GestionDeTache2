@@ -44,7 +44,7 @@ export default function ProjectPage() {
       }
 
       // Récupérer le projet
-      const projectResponse = await fetch(`/api//projet/${projectId}`, {
+      const projectResponse = await fetch(`/api/projet/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

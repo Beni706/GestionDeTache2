@@ -8,7 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { ProjectDialog } from "@/components/projects/project-dialog"
 import Link from "next/link"
-import type { Project } from "@/types"
+
+interface Project {
+  id_projet: number
+  nom: string
+  _count?: { taches: number }
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -20,28 +25,26 @@ export default function DashboardPage() {
   const { data: session, status } = useSession()
 
   const fetchProjects = async () => {
+    // Unifier la récupération du token et de l'ID utilisateur pour les deux modes de connexion
+    const token = session?.user?.apiToken || localStorage.getItem("token")
+    const userId = session?.user?.id || localStorage.getItem("userId")
+
+    // Si aucun token ou ID n'est trouvé, l'utilisateur n'est pas connecté.
+    if (!token || !userId) {
+      setProjects([]) // Vider les projets pour un état propre
+      return
+    }
+
     try {
-      if (status === "loading") return
-
-      const token = session?.user?.apiToken || session?.accessToken || localStorage.getItem("token")
-
-      if (!token) {
-        toast({
-          title: "Erreur d'authentification",
-          description: "Veuillez vous reconnecter",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const response = await fetch(`/api/projet`, {
+      const response = await fetch(`/api/projet/utilisateur/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des projets")
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Erreur lors de la récupération des projets")
       }
 
       const data = await response.json()
@@ -50,22 +53,25 @@ export default function DashboardPage() {
       console.error("Erreur fetchProjects:", error)
       toast({
         title: "Erreur",
-        description: "Impossible de charger les projets",
+        description: error instanceof Error ? error.message : "Impossible de charger les projets",
         variant: "destructive",
       })
     }
   }
 
   useEffect(() => {
+    // La logique de chargement est déclenchée dès que le statut de la session est connu.
+    // fetchProjects gère maintenant les deux cas d'authentification.
+    const loadData = async () => {
+      setIsLoading(true)
+      await fetchProjects()
+      setIsLoading(false)
+    }
+
     if (status !== "loading") {
-      const loadData = async () => {
-        setIsLoading(true)
-        await fetchProjects()
-        setIsLoading(false)
-      }
       loadData()
     }
-  }, [status])
+  }, [status, session])
 
   const handleProjectCreated = () => {
     fetchProjects()
@@ -113,7 +119,7 @@ export default function DashboardPage() {
                     <FolderOpen className="h-5 w-5" />
                     {project.nom}
                   </CardTitle>
-                  <CardDescription>{project.taches?.length || 0} tâche(s)</CardDescription>
+                  <CardDescription>{project._count?.taches || 0} tâche(s)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">

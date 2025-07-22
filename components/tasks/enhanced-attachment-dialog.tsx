@@ -87,7 +87,9 @@ export function EnhancedAttachmentDialog({
       }
 
       console.log(`Fetching attachments for task ID: ${task.id_tache}`)
-      const response = await fetch(`/api/ficherJoint?id_tache=${task.id_tache}`, {
+
+      // Appel à l'API pour récupérer les pièces jointes
+      const response = await fetch(`/api/ficherJoint/tache/${task.id_tache}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

@@ -11,8 +11,6 @@ import { TaskDialog } from "@/components/tasks/task-dialog"
 import { CategoryDialog } from "@/components/categories/category-dialog"
 import type { Task, Category, Project } from "@/types"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 export default function ProjectPage() {
   const params = useParams()
   const router = useRouter()
@@ -58,7 +56,7 @@ export default function ProjectPage() {
       setProject(projectData)
 
       // Récupérer les tâches du projet
-      const tasksResponse = await fetch(`${API_URL}/tache?projet=${projectId}`, {
+      const tasksResponse = await fetch(`/api/tache/projet/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,7 +68,7 @@ export default function ProjectPage() {
       }
 
       // Récupérer les catégories du projet
-      const categoriesResponse = await fetch(`${API_URL}/categorie?projet=${projectId}`, {
+      const categoriesResponse = await fetch(`/api/categorie?projet=${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -107,7 +105,7 @@ export default function ProjectPage() {
       if (!taskToUpdate) return
 
       const token = session?.user?.apiToken || session?.accessToken || localStorage.getItem("token")
-      const response = await fetch(`${API_URL}/tache/${taskId}`, {
+      const response = await fetch(`/api/tache/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

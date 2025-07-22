@@ -50,5 +50,7 @@ COPY --from=builder /app/app/generated/prisma ./app/generated/prisma
 
 EXPOSE 3000
 
+RUN pnpm exec prisma migrate deploy
+
 # Lancer l'app Next.js avec pnpm
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm start"]

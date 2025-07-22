@@ -46,6 +46,7 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 # Copier le client Prisma généré qui contient les binaires pour Alpine Linux
 COPY --from=builder /app/app/generated/prisma ./app/generated/prisma
+COPY --from=builder /app/prisma ./prisma
 
 
 EXPOSE 3000
